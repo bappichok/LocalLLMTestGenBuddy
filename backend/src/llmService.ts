@@ -27,6 +27,7 @@ interface GenerateRequest {
     attachmentMimeType?: string;
     provider: LLMProvider;
     outputFormat?: OutputFormat;    // 'table' (default) or 'gherkin'
+    testCount?: number;             // how many test cases to generate (default 10)
     apiKeys?: Record<string, string>;
     endpoints?: Record<string, string>;
 }
@@ -167,7 +168,8 @@ export class LLMService {
         const activePrompt = isGherkin ? GHERKIN_SYSTEM_PROMPT : SYSTEM_PROMPT;
 
         // Build user prompt
-        let userPrompt = `Jira ID: ${req.jiraId}\nRequirement: ${req.requirement}`;
+        const count = Math.min(Math.max(req.testCount || 10, 1), 30);
+        let userPrompt = `Jira ID: ${req.jiraId}\nRequirement: ${req.requirement}\n\nGenerate exactly ${count} test cases.`;
         if (req.attachmentText) {
             userPrompt += `\n\nATTACHED DOCUMENT/LOGS/PRD:\n${req.attachmentText}`;
         }

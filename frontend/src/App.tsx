@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { Sparkles, Server, Loader2, Copy, Check, ShieldCheck, FileText, Image, Github, ChevronLeft, ChevronRight, Clock, Download } from 'lucide-react'
 import './index.css'
 
@@ -128,6 +128,7 @@ export default function App() {
   const [requirement, setRequirement] = useState('');
   const [llmProvider, setLlmProvider] = useState<LLMProvider>('ollama');
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('table');
+  const [testCount, setTestCount] = useState(10);
   const [envelope, setEnvelope] = useState<LLMEnvelope | null>(null);
   const [attachment, setAttachment] = useState<AttachmentInfo | null>(null);
   const [loading, setLoading] = useState(false);
@@ -136,7 +137,17 @@ export default function App() {
   const [gherkinCopied, setGherkinCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<'results' | 'validation' | 'history' | 'gherkin'>('results');
   const [currentPage, setCurrentPage] = useState(1);
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [history, setHistory] = useState<HistoryEntry[]>(() => {
+    try {
+      const saved = localStorage.getItem('llm-test-history');
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+
+  // Persist history to localStorage whenever it changes
+  useEffect(() => {
+    try { localStorage.setItem('llm-test-history', JSON.stringify(history)); } catch { /* storage full */ }
+  }, [history]);
 
   // ── File Handler ───────────────────────────────────────────────────────────
   const handleFileChange = useCallback(async (file: File | null) => {
@@ -173,7 +184,7 @@ export default function App() {
     }
 
     try {
-      const body: Record<string, string> = { jiraId, requirement, provider: llmProvider, outputFormat };
+      const body: Record<string, string | number> = { jiraId, requirement, provider: llmProvider, outputFormat, testCount };
       if (attachment?.type === 'text') body.attachmentText = attachment.textContent || '';
       else if (attachment?.type === 'pdf' || attachment?.type === 'image') {
         body.attachmentBase64 = attachment.base64 || '';
@@ -322,6 +333,24 @@ export default function App() {
                 >
                   🥒 BDD / Gherkin
                 </button>
+              </div>
+            </div>
+
+            <div className="input-group">
+              <label className="req-label">
+                Number of Test Cases
+                <span className="char-count">{testCount} cases</span>
+              </label>
+              <div className="format-toggle">
+                {[5, 10, 15, 20, 30].map(n => (
+                  <button
+                    key={n}
+                    className={`format-btn ${testCount === n ? 'active' : ''}`}
+                    onClick={() => setTestCount(n)}
+                  >
+                    {n}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -712,17 +741,34 @@ export default function App() {
             <div className="gherkin-panel">
               <div className="gherkin-header">
                 <span>🥒 BDD Feature File</span>
-                <button
-                  className="copy-btn"
-                  onClick={() => {
-                    navigator.clipboard.writeText(envelope.gherkin || '');
-                    setGherkinCopied(true);
-                    setTimeout(() => setGherkinCopied(false), 2000);
-                  }}
-                >
-                  {gherkinCopied ? <Check size={16} /> : <Copy size={16} />}
-                  {gherkinCopied ? 'Copied!' : 'Copy .feature'}
-                </button>
+                <div className="action-btns">
+                  <button
+                    className="copy-btn"
+                    onClick={() => {
+                      navigator.clipboard.writeText(envelope.gherkin || '');
+                      setGherkinCopied(true);
+                      setTimeout(() => setGherkinCopied(false), 2000);
+                    }}
+                  >
+                    {gherkinCopied ? <Check size={16} /> : <Copy size={16} />}
+                    {gherkinCopied ? 'Copied!' : 'Copy'}
+                  </button>
+                  <button
+                    className="export-csv-btn"
+                    onClick={() => {
+                      const blob = new Blob([envelope.gherkin || ''], { type: 'text/plain' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `${jiraId || 'feature'}.feature`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                  >
+                    <Download size={16} />
+                    Download .feature
+                  </button>
+                </div>
               </div>
               <pre className="gherkin-block"><code>{envelope.gherkin}</code></pre>
             </div>
