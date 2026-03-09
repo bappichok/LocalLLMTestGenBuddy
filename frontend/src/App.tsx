@@ -388,6 +388,9 @@ export default function App() {
             )}
           </div>
 
+          {/* ─── Scrollable content area ─── */}
+          <div className="results-scroll-area">
+
           {/* ─── Empty / Loading ─── */}
           {!envelope && !loading && activeTab !== 'history' && (
             <div className="empty-state">
@@ -585,7 +588,9 @@ export default function App() {
               )}
             </div>
           )}
+          </div>{/* end results-scroll-area */}
         </aside>
+
       </div>
     </div>
   );

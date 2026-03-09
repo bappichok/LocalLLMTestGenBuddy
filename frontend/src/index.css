@@ -146,6 +146,15 @@ body {
   overflow: hidden;
 }
 
+/* scrollable content area within the results panel */
+.results-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 
 /* ── Form elements ───────────────────────────────────────────────────────────── */
 .input-group {
@@ -483,7 +492,6 @@ body {
 
 /* ── Table ───────────────────────────────────────────────────────────────────── */
 .table-wrapper {
-  flex: 1;
   overflow-x: auto;
   padding: 1rem 2rem 2rem;
 }
