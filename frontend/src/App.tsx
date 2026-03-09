@@ -342,6 +342,26 @@ export default function App() {
                 onChange={e => setRequirement(e.target.value)}
                 maxLength={15000}
               />
+              <button
+                className="example-btn"
+                onClick={() => {
+                  setJiraId('PROJ-1234');
+                  setRequirement(
+`Login page with the following requirements:
+- Email address and password input fields
+- "Login" button to submit credentials
+- "Forgot Password" link to trigger reset flow
+- Remember Me checkbox for persistent sessions
+- Multi-Factor Authentication (MFA) support via OTP
+- Show/hide password toggle on the password field
+- Input validation with clear error messages for invalid email or wrong password
+- Account lockout after 5 consecutive failed attempts
+- Redirect to dashboard on successful authentication`
+                  );
+                }}
+              >
+                ✨ Try Example Requirement
+              </button>
             </div>
 
             <div className="input-group">

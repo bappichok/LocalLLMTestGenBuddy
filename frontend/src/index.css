@@ -918,3 +918,27 @@ body {
 
 .source-fact-text::before { content: open-quote; }
 .source-fact-text::after  { content: close-quote; }
+
+/* ── Example Requirement Button ─────────────────────────────────────────────── */
+.example-btn {
+  margin-top: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: 1px dashed rgba(0, 210, 255, 0.35);
+  color: var(--cyan);
+  border-radius: 7px;
+  padding: 0.35rem 0.85rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  opacity: 0.8;
+}
+
+.example-btn:hover {
+  background: rgba(0, 210, 255, 0.08);
+  border-color: var(--cyan);
+  opacity: 1;
+}
