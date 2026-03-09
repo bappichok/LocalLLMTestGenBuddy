@@ -91,10 +91,12 @@ body {
 
 /* ── Layout ──────────────────────────────────────────────────────────────────── */
 .app-container {
-  min-height: 100vh;
+  height: 100vh;       /* fixed, not min-height */
+  overflow: hidden;    /* prevent page-level scroll */
   display: flex;
   flex-direction: column;
 }
+
 
 .layout-grid {
   display: grid;
