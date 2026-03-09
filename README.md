@@ -1,8 +1,9 @@
 # 🧪 LocalLLMTestGenBuddy
 
 [![GitHub](https://img.shields.io/badge/github-bappichok-181717?logo=github)](https://github.com/bappichok)
+[![CI](https://github.com/bappichok/LocalLLMTestGenBuddy/actions/workflows/ci.yml/badge.svg)](https://github.com/bappichok/LocalLLMTestGenBuddy/actions)
 
-> AI-powered Jira test case generator with **Anti-Hallucination guardrails**, **PDF/Image support**, and **automated traceability scoring**.
+> AI-powered Jira test case generator with **Anti-Hallucination guardrails**, **BDD/Gherkin support**, and **automated traceability scoring**.
 
 ---
 
@@ -10,13 +11,15 @@
 
 | Feature | Description |
 |---|---|
-| 🤖 **Multi-LLM Support** | Ollama, LM Studio, OpenAI GPT-4o, Claude 3.5, Gemini 1.5, Grok, Groq |
-| 🛡️ **Anti-Hallucination** | Strict fact-verification before generating test cases |
-| 📄 **PDF & Image Upload** | Attach PRDs, screenshots, or design docs as context |
-| ✅ **Validation Scoring** | Automated traceability score for every test case |
-| 📋 **History Tab** | Session history with one-click restore |
-| 📑 **Pagination** | Clean paginated results table (10 rows per page) |
-| 📋 **Copy to Clipboard** | Export test cases as a tab-separated table |
+| 🤖 **Multi-LLM Support** | Ollama, LM Studio, OpenAI GPT-4o, Claude 3.5, Gemini 2.0 Flash, Grok, Groq |
+| 🛡️ **Anti-Hallucination** | Strict fact-verification before generating test cases, with inline "Source Fact" citations |
+| 🥒 **BDD / Gherkin Mode** | Generate standard table output OR switch to BDD/Gherkin with `.feature` file downloads |
+| 📄 **PDF & Image Upload** | Attach PRDs, screenshots, or design docs as context (Vision-enabled models only) |
+| 🔌 **Swagger / OpenAPI** | Upload `.yaml`, `.yml`, or `.json` API specs to automatically generate API test scenarios |
+| ✅ **Validation Scoring** | Automated traceability score for every test case with PASS/WARN/FAIL labels |
+| 📋 **Persistent History** | Session history survives page reloads (via `localStorage`) with one-click restore |
+| 🔢 **Custom Test Count** | Choose exactly how many test cases to generate (5, 10, 15, 20, or 30) |
+| 🚀 **Try Example Button** | One-click example to instantly test the tool's capabilities |
 
 ---
 
@@ -24,10 +27,10 @@
 
 ```
 TestCase_Generator_LocalLLM/
-├── backend/               # Express + TypeScript API
+├── backend/               # Express + TypeScript API (Rate limited, CORS protected)
 │   ├── src/
-│   │   ├── index.ts       # Express server, routes
-│   │   └── llmService.ts  # Multi-LLM provider layer
+│   │   ├── index.ts       # Express server, routes, rate limiter, sanitization
+│   │   └── llmService.ts  # Multi-LLM provider layer with timeout handling
 │   ├── .env.example       # Copy to .env and fill in keys
 │   └── package.json
 ├── frontend/              # React + Vite + TypeScript UI
@@ -35,6 +38,7 @@ TestCase_Generator_LocalLLM/
 │   │   ├── App.tsx        # Main application component
 │   │   └── index.css      # Dark theme design system
 │   └── package.json
+├── .github/workflows/     # CI/CD pipelines (TypeScript type-check + ESLint)
 ├── Design/                # UI wireframes & design assets
 └── README.md
 ```
@@ -81,9 +85,11 @@ npm run dev
 | LM Studio | — | Local, no key needed |
 | OpenAI GPT-4o | `OPENAI_API_KEY` | Vision + PDF ✓ |
 | Claude 3.5 Sonnet | `CLAUDE_API_KEY` | Vision + PDF ✓ |
-| Gemini 1.5 Pro | `GEMINI_API_KEY` | Vision ✓ |
+| Gemini 2.0 Flash | `GEMINI_API_KEY` | Vision ✓ |
 | Grok (xAI) | `GROK_API_KEY` | |
 | Groq (llama-3.3-70b) | `GROQ_API_KEY` | Super fast 🚀 |
+
+*(All API calls enforce a strict 60-second timeout to prevent hangups).*
 
 ---
 
@@ -93,6 +99,8 @@ Every generation goes through a 3-step guardrail before test cases are written:
 1. **Fact Extraction** — Only uses facts explicitly stated in the requirement
 2. **Missing Info Detection** — Flags gaps that could lead to assumptions  
 3. **Self-Validation Audit** — The LLM checks its own output before returning
+
+This is visibly proven in the UI: every test case in the results table displays its **📌 Source Fact**, proving exactly which part of the requirement it was derived from.
 
 ---
 
@@ -105,11 +113,13 @@ The **Validation Score tab** automatically:
 
 ---
 
-## 🔒 Security Notes
+## 🔒 Security & Architecture (v1.2)
 
-- API keys are stored in `.env` (never committed to git)
-- No authentication is built-in — suitable for **internal/personal use**
-- For public deployment, add User Auth (Firebase/Clerk) and rate limiting
+- **Input Sanitization:** User inputs are stripped of HTML/malicious tags before prompt injection.
+- **Rate Limiting:** In-memory rate limiter caps generations to 10 requests/minute per IP.
+- **CORS Protection:** Dev mode remains open, while production deployments lock down `ALLOWED_ORIGINS`.
+- **Friendly Error Handling:** Secure translation of upstream errors (Quota Exceeded, Content Filters, Timeout) into user-friendly messages.
+- **API Keys:** Managed via `.env` and kept strictly server-side.
 
 ---
 
