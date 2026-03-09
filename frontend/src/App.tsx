@@ -517,7 +517,24 @@ export default function App() {
                                 {tc.type}
                               </span>
                             </td>
-                            <td className="objective-col">{tc.testObjective}</td>
+                            <td className="objective-col">
+                              {tc.testObjective}
+                              {(() => {
+                                const vr = validationResults.find(v => v.testCaseId === tc.id);
+                                if (!vr) return null;
+                                const fact = vr.matchedFacts[0];
+                                return fact ? (
+                                  <div className="source-fact">
+                                    <span className="source-fact-label">📌 Source Fact</span>
+                                    <q className="source-fact-text">{fact}</q>
+                                  </div>
+                                ) : (
+                                  <div className="source-fact warn">
+                                    <span className="source-fact-label">⚠️ No matched fact</span>
+                                  </div>
+                                );
+                              })()}
+                            </td>
                             <td className="steps-col">
                               <ol className="steps-list">
                                 {tc.testSteps.split(/\n/).filter(Boolean).map((step, si) => (

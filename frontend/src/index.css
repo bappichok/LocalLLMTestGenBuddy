@@ -880,3 +880,41 @@ body {
 }
 
 .gherkin-block code { color: inherit; background: none; }
+
+/* ── Source Fact (inline traceability) ──────────────────────────────────────── */
+.source-fact {
+  margin-top: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border-left: 2px solid var(--green);
+  background: rgba(74, 222, 128, 0.06);
+  border-radius: 0 6px 6px 0;
+}
+
+.source-fact.warn {
+  border-left-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.06);
+}
+
+.source-fact-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 0.2rem;
+}
+
+.source-fact.warn .source-fact-label { color: #f59e0b; }
+
+.source-fact-text {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.5;
+  quotes: "\201C" "\201D";
+}
+
+.source-fact-text::before { content: open-quote; }
+.source-fact-text::after  { content: close-quote; }
