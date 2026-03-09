@@ -731,3 +731,45 @@ body {
   font-size: 0.8rem;
   color: #64748b;
 }
+
+/* ── Template Table (spreadsheet-style) ─────────────────────────────────────── */
+.template-table {
+  min-width: 1100px;
+}
+
+.template-table th:nth-child(1) { width: 50px; }
+.template-table th:nth-child(2) { width: 80px; }
+.template-table th:nth-child(3) { width: 90px; }
+.template-table th:nth-child(4) { width: 160px; }
+.template-table th:nth-child(5) { width: 260px; }
+.template-table th:nth-child(6) { width: 160px; }
+.template-table th:nth-child(7),
+.template-table th:nth-child(8),
+.template-table th:nth-child(9) { width: 90px; }
+
+.objective-col { font-weight: 500; }
+.steps-col, .expected-col { vertical-align: top; }
+
+.steps-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.steps-list li { margin-bottom: 0.15rem; }
+
+.tester-col {
+  background: rgba(255, 255, 255, 0.02);
+  min-width: 80px;
+  text-align: center;
+}
+.tester-col.muted { background: rgba(255, 255, 255, 0.015); }
+
+.pf-badge {
+  display: inline-block;
+  width: 60px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}

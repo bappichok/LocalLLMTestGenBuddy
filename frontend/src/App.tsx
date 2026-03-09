@@ -12,8 +12,12 @@ interface TestCase {
   id: string;
   jiraId: string;
   type: string;
-  description: string;
-  expected: string;
+  testObjective: string;   // What is being tested
+  testSteps: string;       // Numbered step-by-step instructions
+  expectedResult: string;  // What should happen
+  actualResult: string;    // Blank — filled by tester
+  passFail: string;        // Blank — filled by tester
+  relatedDefects: string;  // Blank — filled by tester
 }
 
 interface LLMEnvelope {
@@ -60,7 +64,7 @@ function validateTestCases(testCases: TestCase[], facts: string[], requirement: 
   const allKnownKeywords = new Set([...requirementKeywords, ...factKeywords]);
 
   return testCases.map(tc => {
-    const tcText = `${tc.description} ${tc.expected}`.toLowerCase();
+    const tcText = `${tc.testObjective} ${tc.testSteps} ${tc.expectedResult}`.toLowerCase();
     const tcWords = extractKeywords(tcText);
 
     const matchedFacts = facts.filter(fact => {
@@ -202,9 +206,9 @@ export default function App() {
 
   const handleCopyTable = () => {
     if (!envelope?.testCases.length) return;
-    const headers = 'Test ID\tJira ID\tType\tDescription\tExpected Result\n';
+    const headers = 'Req ID\tJira ID\tType\tTest Objective\tTest Steps\tExpected Result\tActual Result\tPass/Fail\tRelated Defects\n';
     const rows = envelope.testCases.map(r =>
-      `${r.id}\t${r.jiraId}\t${r.type}\t${r.description.replace(/\n/g, ' ')}\t${r.expected.replace(/\n/g, ' ')}`
+      `${r.id}\t${r.jiraId}\t${r.type}\t${r.testObjective.replace(/\n/g, ' ')}\t${r.testSteps.replace(/\n/g, ' | ')}\t${r.expectedResult.replace(/\n/g, ' ')}\t${r.actualResult}\t${r.passFail}\t${r.relatedDefects}`
     ).join('\n');
     navigator.clipboard.writeText(headers + rows);
     setCopied(true);
@@ -426,11 +430,18 @@ export default function App() {
               {results.length > 0 ? (
                 <>
                   <div className="table-wrapper">
-                    <table className="results-table">
+                    <table className="results-table template-table">
                       <thead>
                         <tr>
-                          <th>Test ID</th><th>Jira ID</th><th>Type</th>
-                          <th>Description</th><th>Expected Result</th>
+                          <th>Req ID</th>
+                          <th>Jira ID</th>
+                          <th>Type</th>
+                          <th>Test Objective</th>
+                          <th>Test Steps</th>
+                          <th>Expected Result</th>
+                          <th>Actual Result</th>
+                          <th>Pass / Fail</th>
+                          <th>Related Defects</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -443,8 +454,20 @@ export default function App() {
                                 {tc.type}
                               </span>
                             </td>
-                            <td>{tc.description}</td>
-                            <td>{tc.expected}</td>
+                            <td className="objective-col">{tc.testObjective}</td>
+                            <td className="steps-col">
+                              <ol className="steps-list">
+                                {tc.testSteps.split(/\n/).filter(Boolean).map((step, si) => (
+                                  <li key={si}>{step.replace(/^\d+\.\s*/, '')}</li>
+                                ))}
+                              </ol>
+                            </td>
+                            <td className="expected-col">{tc.expectedResult}</td>
+                            <td className="tester-col muted"></td>
+                            <td className="tester-col">
+                              <span className="pf-badge"></span>
+                            </td>
+                            <td className="tester-col muted"></td>
                           </tr>
                         ))}
                       </tbody>

@@ -28,8 +28,12 @@ interface TestCaseResult {
     id: string;
     jiraId: string;
     type: string;
-    description: string;
-    expected: string;
+    testObjective: string;   // Short description of WHAT is being tested
+    testSteps: string;       // Numbered, step-by-step instructions
+    expectedResult: string;  // What should happen
+    actualResult: string;    // Left blank — filled by tester
+    passFail: string;        // Left blank — filled by tester
+    relatedDefects: string;  // Left blank — filled by tester
 }
 
 const SYSTEM_PROMPT = `
@@ -53,6 +57,7 @@ PROCESS YOU MUST FOLLOW:
 Step 1: Extract verifiable facts from the input.
 Step 2: List unknown or missing information.
 Step 3: Generate exactly N test cases ONLY from Step 1 facts (at least 5 if unspecified).
+         For each test case, write DETAILED numbered test steps (e.g., "1. Navigate to URL\n2. Click Login").
 Step 4: Perform a self-check for hallucinations or contradictions.
 
 OUTPUT FORMAT REQUIREMENTS:
@@ -68,13 +73,20 @@ Strictly adhere to this schema:
       "id": "1",
       "jiraId": "PROJ-123",
       "type": "Functional",
-      "description": "Short description",
-      "expected": "Expected result"
+      "testObjective": "Short description of WHAT is being tested",
+      "testSteps": "1. Go to the application URL\n2. Enter valid credentials\n3. Click the Submit button",
+      "expectedResult": "User is redirected to the dashboard",
+      "actualResult": "",
+      "passFail": "",
+      "relatedDefects": ""
     }
   ]
 }
 
-Ensure output is valid JSON parseable by JSON.parse(). DO NOT wrap testCases at the root level.
+IMPORTANT:
+- testSteps MUST be a single string with numbered steps separated by \\n
+- actualResult, passFail, relatedDefects MUST always be empty strings (filled by tester)
+- Ensure output is valid JSON parseable by JSON.parse(). DO NOT wrap testCases at the root level.
 `;
 
 // ─── Shared OpenAI-compatible helper (used by OpenAI, Grok, Groq, LM Studio) ─
