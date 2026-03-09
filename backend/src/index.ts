@@ -19,10 +19,18 @@ app.get('/api/health', (_req, res) => {
 // ── Main generation endpoint ──────────────────────────────────────────────────
 app.post('/api/generate', async (req, res) => {
   try {
-    const { jiraId, requirement, provider, attachmentText, attachmentBase64, attachmentMimeType } = req.body;
+    const { jiraId, requirement, provider, attachmentText, attachmentBase64, attachmentMimeType, outputFormat } = req.body;
 
     if (!jiraId || !requirement || !provider) {
       return res.status(400).json({ error: 'jiraId, requirement, and provider are required' });
+    }
+
+    // ── Input length limits ──────────────────────────────────────────────────
+    if (requirement.length > 15_000) {
+      return res.status(400).json({ error: 'Requirement text is too long (max 15,000 characters). Please shorten or paste only the relevant section.' });
+    }
+    if (attachmentText && attachmentText.length > 80_000) {
+      return res.status(400).json({ error: 'Attachment text is too large (max 80,000 characters). Please use a shorter document.' });
     }
 
     // Log what we received for debugging
@@ -54,6 +62,7 @@ app.post('/api/generate', async (req, res) => {
       attachmentBase64: attachmentBase64 || '',
       attachmentMimeType: attachmentMimeType || '',
       provider: provider as LLMProvider,
+      outputFormat: outputFormat || 'table',
       apiKeys,
       endpoints
     });

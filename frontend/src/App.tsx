@@ -4,6 +4,7 @@ import './index.css'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type LLMProvider = 'ollama' | 'lmstudio' | 'openai' | 'claude' | 'gemini' | 'grok' | 'groq';
+export type OutputFormat = 'table' | 'gherkin';
 
 const VISION_PROVIDERS: LLMProvider[] = ['openai', 'claude', 'gemini'];
 const PAGE_SIZE = 10;
@@ -25,6 +26,7 @@ interface LLMEnvelope {
   missingInformation: string[];
   selfValidationCheck: string;
   testCases: TestCase[];
+  gherkin?: string;  // populated when outputFormat === 'gherkin'
 }
 
 interface ValidationResult {
@@ -49,6 +51,7 @@ interface HistoryEntry {
   jiraId: string;
   requirement: string;
   provider: LLMProvider;
+  outputFormat: OutputFormat;
   timestamp: string;
   envelope: LLMEnvelope;
 }
@@ -92,6 +95,8 @@ function validateTestCases(testCases: TestCase[], facts: string[], requirement: 
 function detectFileType(file: File): 'text' | 'pdf' | 'image' {
   if (file.type === 'application/pdf') return 'pdf';
   if (file.type.startsWith('image/')) return 'image';
+  // YAML/JSON Swagger specs treated as text
+  if (file.name.endsWith('.yaml') || file.name.endsWith('.yml') || file.name.endsWith('.json')) return 'text';
   return 'text';
 }
 
@@ -122,12 +127,14 @@ export default function App() {
   const [jiraId, setJiraId] = useState('');
   const [requirement, setRequirement] = useState('');
   const [llmProvider, setLlmProvider] = useState<LLMProvider>('ollama');
+  const [outputFormat, setOutputFormat] = useState<OutputFormat>('table');
   const [envelope, setEnvelope] = useState<LLMEnvelope | null>(null);
   const [attachment, setAttachment] = useState<AttachmentInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<'results' | 'validation' | 'history'>('results');
+  const [gherkinCopied, setGherkinCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<'results' | 'validation' | 'history' | 'gherkin'>('results');
   const [currentPage, setCurrentPage] = useState(1);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
 
@@ -166,7 +173,7 @@ export default function App() {
     }
 
     try {
-      const body: Record<string, string> = { jiraId, requirement, provider: llmProvider };
+      const body: Record<string, string> = { jiraId, requirement, provider: llmProvider, outputFormat };
       if (attachment?.type === 'text') body.attachmentText = attachment.textContent || '';
       else if (attachment?.type === 'pdf' || attachment?.type === 'image') {
         body.attachmentBase64 = attachment.base64 || '';
@@ -184,6 +191,8 @@ export default function App() {
 
       const env: LLMEnvelope = data.testCases || { verifiedFacts: [], missingInformation: [], selfValidationCheck: '', testCases: [] };
       setEnvelope(env);
+      // Switch to gherkin tab automatically if that format was chosen
+      if (outputFormat === 'gherkin') setActiveTab('gherkin');
 
       // Add to session history (max 20)
       const entry: HistoryEntry = {
@@ -191,6 +200,7 @@ export default function App() {
         jiraId,
         requirement: requirement.slice(0, 100),
         provider: llmProvider,
+        outputFormat,
         timestamp: new Date().toLocaleTimeString(),
         envelope: env,
       };
@@ -298,17 +308,39 @@ export default function App() {
             </div>
 
             <div className="input-group">
+              <label>Output Format</label>
+              <div className="format-toggle">
+                <button
+                  className={`format-btn ${outputFormat === 'table' ? 'active' : ''}`}
+                  onClick={() => setOutputFormat('table')}
+                >
+                  📋 Table
+                </button>
+                <button
+                  className={`format-btn ${outputFormat === 'gherkin' ? 'active' : ''}`}
+                  onClick={() => setOutputFormat('gherkin')}
+                >
+                  🥒 BDD / Gherkin
+                </button>
+              </div>
+            </div>
+
+            <div className="input-group">
               <label>Jira Ticket ID</label>
               <input type="text" placeholder="e.g. PROJ-1234" value={jiraId} onChange={e => setJiraId(e.target.value)} />
             </div>
 
             <div className="input-group">
-              <label>Requirement / Description</label>
+              <label className="req-label">
+                Requirement / Description
+                <span className={`char-count ${requirement.length > 12000 ? 'warn' : ''}`}>{requirement.length.toLocaleString()} / 15,000</span>
+              </label>
               <textarea
                 rows={6}
                 placeholder="Paste your Jira user story, acceptance criteria, or requirement here..."
                 value={requirement}
                 onChange={e => setRequirement(e.target.value)}
+                maxLength={15000}
               />
             </div>
 
@@ -322,7 +354,7 @@ export default function App() {
               <input
                 type="file"
                 className="file-input"
-                accept=".txt,.csv,.log,.md,.pdf,.png,.jpg,.jpeg,.webp"
+                accept=".txt,.csv,.log,.md,.yaml,.yml,.json,.pdf,.png,.jpg,.jpeg,.webp"
                 onChange={e => handleFileChange(e.target.files?.[0] || null)}
               />
               {attachment && (
@@ -357,7 +389,7 @@ export default function App() {
                 </div>
               )}
               {!attachment && (
-                <p className="hint-text">Upload PRD, logs, screenshots, or PDF to prevent hallucination.</p>
+                <p className="hint-text">Upload PRD, Swagger/YAML, logs, screenshots, or PDF to prevent hallucination.</p>
               )}
             </div>
 
@@ -398,6 +430,11 @@ export default function App() {
                 History
                 {history.length > 0 && <span className="tab-count">{history.length}</span>}
               </button>
+              {envelope?.gherkin && (
+                <button className={`tab-btn ${activeTab === 'gherkin' ? 'active' : ''}`} onClick={() => setActiveTab('gherkin')}>
+                  🥒 Gherkin
+                </button>
+              )}
             </div>
             {activeTab === 'results' && results.length > 0 && (
               <div className="action-btns">
@@ -630,6 +667,27 @@ export default function App() {
                   </table>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ─── Gherkin Tab ─── */}
+          {!loading && activeTab === 'gherkin' && envelope?.gherkin && (
+            <div className="gherkin-panel">
+              <div className="gherkin-header">
+                <span>🥒 BDD Feature File</span>
+                <button
+                  className="copy-btn"
+                  onClick={() => {
+                    navigator.clipboard.writeText(envelope.gherkin || '');
+                    setGherkinCopied(true);
+                    setTimeout(() => setGherkinCopied(false), 2000);
+                  }}
+                >
+                  {gherkinCopied ? <Check size={16} /> : <Copy size={16} />}
+                  {gherkinCopied ? 'Copied!' : 'Copy .feature'}
+                </button>
+              </div>
+              <pre className="gherkin-block"><code>{envelope.gherkin}</code></pre>
             </div>
           )}
           </div>{/* end results-scroll-area */}
