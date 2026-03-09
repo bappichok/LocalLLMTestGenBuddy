@@ -773,3 +773,30 @@ body {
   border-radius: 4px;
   border: 1px dashed rgba(255, 255, 255, 0.1);
 }
+
+/* ── Action Buttons (Copy + Export CSV) ─────────────────────────────────────── */
+.action-btns {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.export-csv-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  color: var(--green);
+  border-radius: 7px;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.export-csv-btn:hover {
+  background: rgba(74, 222, 128, 0.2);
+  border-color: var(--green);
+}

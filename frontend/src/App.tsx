@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
-import { Sparkles, Server, Loader2, Copy, Check, ShieldCheck, FileText, Image, Github, ChevronLeft, ChevronRight, Clock } from 'lucide-react'
+import { Sparkles, Server, Loader2, Copy, Check, ShieldCheck, FileText, Image, Github, ChevronLeft, ChevronRight, Clock, Download } from 'lucide-react'
 import './index.css'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -215,6 +215,26 @@ export default function App() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleExportCSV = () => {
+    if (!envelope?.testCases.length) return;
+    const escape = (val: string) => `"${(val || '').replace(/"/g, '""').replace(/\n/g, ' | ')}"`;
+    const headers = ['Req ID','Jira ID','Type','Test Objective','Test Steps','Expected Result','Actual Result','Pass/Fail','Related Defects']
+      .map(escape).join(',');
+    const rows = envelope.testCases.map(r =>
+      [r.id, r.jiraId, r.type, r.testObjective, r.testSteps, r.expectedResult, r.actualResult, r.passFail, r.relatedDefects]
+        .map(v => escape(String(v || '')))
+        .join(',')
+    );
+    const csv = [headers, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${jiraId || 'test-cases'}_${new Date().toISOString().slice(0,10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const loadHistoryEntry = (entry: HistoryEntry) => {
     setEnvelope(entry.envelope);
     setJiraId(entry.jiraId);
@@ -380,10 +400,16 @@ export default function App() {
               </button>
             </div>
             {activeTab === 'results' && results.length > 0 && (
-              <button className="copy-btn" onClick={handleCopyTable}>
-                {copied ? <Check size={16} /> : <Copy size={16} />}
-                {copied ? 'Copied!' : 'Copy Table'}
-              </button>
+              <div className="action-btns">
+                <button className="copy-btn" onClick={handleCopyTable}>
+                  {copied ? <Check size={16} /> : <Copy size={16} />}
+                  {copied ? 'Copied!' : 'Copy Table'}
+                </button>
+                <button className="export-csv-btn" onClick={handleExportCSV}>
+                  <Download size={16} />
+                  Export CSV
+                </button>
+              </div>
             )}
           </div>
 
