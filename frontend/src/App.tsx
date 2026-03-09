@@ -291,7 +291,7 @@ export default function App() {
                 <option value="lmstudio">LM Studio (Local)</option>
                 <option value="openai">OpenAI GPT-4o (Vision ✓)</option>
                 <option value="claude">Claude 3.5 Sonnet (Vision + PDF ✓)</option>
-                <option value="gemini">Gemini 1.5 Pro (Vision ✓)</option>
+                <option value="gemini">Gemini 2.0 Flash (Vision ✓)</option>
                 <option value="grok">Grok (xAI)</option>
                 <option value="groq">Groq — llama-3.3-70b</option>
               </select>
