@@ -6,8 +6,8 @@ export type OutputFormat = 'table' | 'gherkin';
 // ── Centralized model config ───────────────────────────────────────────────────
 const MODELS = {
     ollama: 'llama3.2',
-    groq:   'llama-3.3-70b-versatile',
-    grok:   'grok-beta',
+    groq: 'llama-3.3-70b-versatile',
+    grok: 'grok-beta',
     openai: 'gpt-4o',
     claude: 'claude-3-5-sonnet-20240620',
     gemini: 'gemini-2.0-flash',
@@ -69,6 +69,13 @@ STRICT RULES (MANDATORY):
 4. Every assertion must be traceable to provided input.
 5. If a detail is inferred, label it explicitly as: "Inference (low confidence)".
 6. Output must be deterministic and repeatable.
+7. Test cases MUST NOT only follow the "happy path". 
+8. You MUST include a mix of scenarios:
+   - Positive/Happy path (valid inputs, expected user behavior)
+   - Negative scenarios (invalid inputs, missing permissions, empty fields)
+   - Edge/Boundary cases (max/min lengths, special characters)
+   - System error states (timeouts, API failures, what the system does when something goes wrong)
+9. Think like a real end-user and include unpredictable or mistaken user actions.
 
 PROCESS YOU MUST FOLLOW:
 Step 1: Extract verifiable facts from the input.
@@ -115,6 +122,7 @@ STRICT RULES:
 2. Do NOT invent steps, fields, or behaviour.
 3. Use proper Gherkin keywords: Feature, Scenario, Given, When, Then, And, But.
 4. Each Scenario should be independent and testable.
+5. Scenarios MUST NOT only follow the "happy path". Include positive, negative (invalid input), edge cases, and error states (like timeouts and system failures). Think like a real, unpredictable user.
 
 OUTPUT FORMAT: Valid JSON only. No markdown, no preamble.
 
