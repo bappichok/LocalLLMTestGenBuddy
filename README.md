@@ -225,8 +225,6 @@ The platform includes baseline protections for safer and more reliable usage:
 
 ## Recommended README Enhancements
 
-To make this repository even stronger for recruiters, hiring managers, and GitHub visitors, consider adding:
-
 - screenshots of the main UI,
 - a sample input and output section,
 - a short architecture diagram,
