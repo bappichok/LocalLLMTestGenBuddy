@@ -98,7 +98,7 @@ function friendlyError(rawMessage: string): string {
   if (rawMessage.includes('ECONNREFUSED'))
     return 'Cannot connect to the local LLM server. Make sure Ollama or LM Studio is running on your machine.';
   if (rawMessage.includes('timeout') || rawMessage.includes('ETIMEDOUT') || rawMessage.includes('ECONNABORTED'))
-    return 'The LLM took too long to respond (60s timeout). Try a smaller requirement, or switch to a faster provider like Groq.';
+    return 'The LLM took too long to respond (5min timeout). Try a smaller requirement, or switch to a faster provider like Groq.';
   if (rawMessage.includes('invalid JSON') || rawMessage.includes('JSON format'))
     return 'The LLM returned an unexpected format. Try generating again — local models can be inconsistent. Cloud providers (Groq, Gemini) are more reliable.';
   return rawMessage;

@@ -13,8 +13,8 @@ const MODELS = {
     gemini: 'gemini-2.0-flash',
 } as const;
 
-// 60-second timeout for all LLM calls
-const AXIOS_TIMEOUT = 60_000;
+// 5-minute timeout for all LLM calls (local models can be very slow)
+const AXIOS_TIMEOUT = 300_000;
 
 // Vision-capable providers that can accept image/PDF as base64
 const VISION_PROVIDERS: LLMProvider[] = ['openai', 'claude', 'gemini'];
