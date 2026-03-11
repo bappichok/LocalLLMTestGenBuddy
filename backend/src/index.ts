@@ -57,6 +57,32 @@ setInterval(() => {
   }
 }, 5 * 60_000);
 
+// ── Concurrency Queue ─────────────────────────────────────────────────────────
+const MAX_CONCURRENT_GENERATIONS = 2;
+let activeGenerations = 0;
+const generationQueue: Array<() => void> = [];
+
+function acquireSlot(): Promise<void> {
+  if (activeGenerations < MAX_CONCURRENT_GENERATIONS) {
+    activeGenerations++;
+    return Promise.resolve();
+  }
+  return new Promise<void>(resolve => {
+    generationQueue.push(() => {
+      activeGenerations++;
+      resolve();
+    });
+  });
+}
+
+function releaseSlot() {
+  activeGenerations--;
+  if (generationQueue.length > 0) {
+    const next = generationQueue.shift();
+    if (next) next();
+  }
+}
+
 // ── Friendly error message translator ─────────────────────────────────────────
 function friendlyError(rawMessage: string): string {
   if (rawMessage.includes('quota') || rawMessage.includes('exceeded your current quota'))
@@ -125,20 +151,29 @@ app.post('/api/generate', rateLimit, async (req: Request, res: Response) => {
       lmstudio: process.env.LM_STUDIO_ENDPOINT || 'http://127.0.0.1:1234/v1/chat/completions'
     };
 
-    const result = await LLMService.generateTestCases({
-      jiraId: safeJiraId,
-      requirement: safeRequirement,
-      attachmentText: attachmentText || '',
-      attachmentBase64: attachmentBase64 || '',
-      attachmentMimeType: attachmentMimeType || '',
-      provider: provider as LLMProvider,
-      outputFormat: outputFormat || 'table',
-      testCount: Number(testCount) || 10,
-      apiKeys,
-      endpoints
-    });
+    if (activeGenerations >= MAX_CONCURRENT_GENERATIONS) {
+      console.log(`[Queue] Slots full. Waiting in queue... Active: ${activeGenerations}, Queued: ${generationQueue.length + 1}`);
+    }
+    await acquireSlot();
 
-    res.json({ success: true, testCases: result });
+    try {
+      const result = await LLMService.generateTestCases({
+        jiraId: safeJiraId,
+        requirement: safeRequirement,
+        attachmentText: attachmentText || '',
+        attachmentBase64: attachmentBase64 || '',
+        attachmentMimeType: attachmentMimeType || '',
+        provider: provider as LLMProvider,
+        outputFormat: outputFormat || 'table',
+        testCount: Number(testCount) || 10,
+        apiKeys,
+        endpoints
+      });
+
+      res.json({ success: true, testCases: result });
+    } finally {
+      releaseSlot();
+    }
 
   } catch (error: any) {
     const rawMessage = error.message || 'Internal server error during generation';
