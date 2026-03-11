@@ -259,6 +259,11 @@ export default function App() {
   const handleClearResults = () => {
     setEnvelope(null);
     setActiveTab('results');
+    setJiraId('');
+    setRequirement('');
+    setAttachment(null);
+    const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
   };
 
   const loadHistoryEntry = (entry: HistoryEntry) => {
@@ -406,6 +411,7 @@ export default function App() {
                   : ' (Text files only — switch to Claude/OpenAI/Gemini for PDF & images)'}
               </label>
               <input
+                id="file-upload"
                 type="file"
                 className="file-input"
                 accept=".txt,.csv,.log,.md,.yaml,.yml,.json,.pdf,.png,.jpg,.jpeg,.webp"
