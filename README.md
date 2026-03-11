@@ -223,14 +223,10 @@ The platform includes baseline protections for safer and more reliable usage:
 
 ---
 
-## Recommended README Enhancements
+## Screenshots
 
-- screenshots of the main UI,
-- a sample input and output section,
-- a short architecture diagram,
-- and a “Roadmap” section for upcoming features.
+<img width="1512" height="741" alt="Screenshot 2026-03-09 at 7 20 51 PM" src="https://github.com/user-attachments/assets/bd2aadb5-e26b-4051-9832-48fd4b5a2f1c" />
 
----
 
 ## Author
 
