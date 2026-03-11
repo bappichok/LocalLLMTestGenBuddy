@@ -801,6 +801,26 @@ body {
   border-color: var(--green);
 }
 
+.clear-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: var(--red);
+  border-radius: 7px;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.clear-btn:hover {
+  background: rgba(248, 113, 113, 0.2);
+  border-color: var(--red);
+}
+
 /* ── Output Format Toggle ──────────────────────────────────────────────────── */
 .format-toggle {
   display: flex;

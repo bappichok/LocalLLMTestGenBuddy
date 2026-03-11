@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from 'react'
-import { Sparkles, Server, Loader2, Copy, Check, ShieldCheck, FileText, Image, Github, ChevronLeft, ChevronRight, Clock, Download } from 'lucide-react'
+import { Sparkles, Server, Loader2, Copy, Check, ShieldCheck, FileText, Image, Github, ChevronLeft, ChevronRight, Clock, Download, Trash2 } from 'lucide-react'
 import './index.css'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -256,6 +256,11 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
+  const handleClearResults = () => {
+    setEnvelope(null);
+    setActiveTab('results');
+  };
+
   const loadHistoryEntry = (entry: HistoryEntry) => {
     setEnvelope(entry.envelope);
     setJiraId(entry.jiraId);
@@ -494,6 +499,10 @@ export default function App() {
                 <button className="export-csv-btn" onClick={handleExportCSV}>
                   <Download size={16} />
                   Export CSV
+                </button>
+                <button className="clear-btn" onClick={handleClearResults}>
+                  <Trash2 size={16} />
+                  Clear
                 </button>
               </div>
             )}
@@ -767,6 +776,10 @@ export default function App() {
                   >
                     <Download size={16} />
                     Download .feature
+                  </button>
+                  <button className="clear-btn" onClick={handleClearResults}>
+                    <Trash2 size={16} />
+                    Clear
                   </button>
                 </div>
               </div>
