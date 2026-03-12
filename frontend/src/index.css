@@ -91,17 +91,17 @@ body {
 
 /* ── Layout ──────────────────────────────────────────────────────────────────── */
 .app-container {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .layout-grid {
   display: grid;
   grid-template-columns: 400px 1fr;
-  gap: 0;
   flex: 1;
-  min-height: 0;
+  overflow: hidden;
 }
 
 /* ── Panels ─────────────────────────────────────────────────────────────────── */
@@ -112,6 +112,32 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  overflow: hidden;
+}
+
+.input-scroll-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  overflow-y: auto;
+  padding-right: 0.5rem; /* prevent scrollbar from hugging fields */
+  margin-bottom: 0.5rem;
+}
+
+/* Custom scrollbar for input area to look neat */
+.input-scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+.input-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+.input-scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+.input-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .results-panel {

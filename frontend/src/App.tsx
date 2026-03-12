@@ -315,7 +315,8 @@ export default function App() {
       <div className="layout-grid">
         {/* ── Left: Input Panel (sticky generate button) ── */}
         <main className="input-panel">
-          <div className="input-group">
+          <div className="input-scroll-area">
+            <div className="input-group">
               <label>LLM Provider</label>
               <select value={llmProvider} onChange={e => setLlmProvider(e.target.value as LLMProvider)}>
                 <option value="ollama">Ollama (Local)</option>
@@ -453,7 +454,9 @@ export default function App() {
               )}
             </div>
 
-          {error && <div className="error-message">{error}</div>}
+            {error && <div className="error-message">{error}</div>}
+          </div> {/* end input-scroll-area */}
+
           <button
             className="generate-btn"
             onClick={handleGenerate}
