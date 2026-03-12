@@ -59,6 +59,7 @@ setInterval(() => {
 
 // ── Concurrency Queue ─────────────────────────────────────────────────────────
 const MAX_CONCURRENT_GENERATIONS = 2;
+const MAX_QUEUE_SIZE = 50;
 let activeGenerations = 0;
 const generationQueue: Array<() => void> = [];
 
@@ -66,6 +67,9 @@ function acquireSlot(): Promise<void> {
   if (activeGenerations < MAX_CONCURRENT_GENERATIONS) {
     activeGenerations++;
     return Promise.resolve();
+  }
+  if (generationQueue.length >= MAX_QUEUE_SIZE) {
+    return Promise.reject(new Error('Server is currently at maximum capacity. Please try again later.'));
   }
   return new Promise<void>(resolve => {
     generationQueue.push(() => {
@@ -118,12 +122,23 @@ app.post('/api/generate', rateLimit, async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'jiraId, requirement, and provider are required.' });
     }
 
+    if (typeof jiraId !== 'string' || typeof requirement !== 'string') {
+      return res.status(400).json({ error: 'jiraId and requirement must be strings.' });
+    }
+
+    if (testCount !== undefined && (typeof testCount !== 'number' || testCount < 1 || testCount > 50)) {
+      return res.status(400).json({ error: 'testCount must be a valid number between 1 and 50.' });
+    }
+
     // ── Input length limits ──────────────────────────────────────────────────
     if (requirement.length > 15_000) {
       return res.status(400).json({ error: 'Requirement text is too long (max 15,000 characters). Please shorten or paste only the relevant section.' });
     }
-    if (attachmentText && attachmentText.length > 80_000) {
-      return res.status(400).json({ error: 'Attachment text is too large (max 80,000 characters). Please use a shorter document.' });
+    if (attachmentText && (typeof attachmentText !== 'string' || attachmentText.length > 80_000)) {
+      return res.status(400).json({ error: 'Attachment text is too large or invalid (max 80,000 characters). Please use a shorter document.' });
+    }
+    if (attachmentBase64 && (typeof attachmentBase64 !== 'string' || attachmentBase64.length > 20_000_000)) {
+      return res.status(400).json({ error: 'Attachment file size exceeds the max payload limits of ~15MB. Please compress your PDF/Image.' });
     }
 
     // ── Sanitize inputs ──────────────────────────────────────────────────────

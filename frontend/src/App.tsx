@@ -152,6 +152,14 @@ export default function App() {
   // ── File Handler ───────────────────────────────────────────────────────────
   const handleFileChange = useCallback(async (file: File | null) => {
     if (!file) { setAttachment(null); return; }
+
+    // Enforce 5MB limit on frontend to prevent browser freezing
+    if (file.size > 5 * 1024 * 1024) {
+      setError(`File size exceeds 5MB limit. Please upload a smaller file.`);
+      setAttachment(null);
+      return;
+    }
+
     const type = detectFileType(file);
     try {
       if (type === 'text') {
